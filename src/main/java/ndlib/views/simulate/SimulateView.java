@@ -132,7 +132,7 @@ public class SimulateView extends VerticalLayout {
                 specificModelComboBox.setItems("DynSI", "DynSIS", "DynSIR");
                 break;
             case "Opinion Dynamic Models":
-                specificModelComboBox.setItems("Voter", "Snajzd", "Q-Vote", "Majority Rule", "Cognitive Opinion Dynamics");
+                specificModelComboBox.setItems("Voter", "Snajzd", "Q-Voter", "Majority Rule", "Cognitive Opinion Dynamics");
                 break;
             default:
                 specificModelComboBox.setVisible(false);
@@ -167,7 +167,7 @@ public class SimulateView extends VerticalLayout {
                 break;
             case "Voter":
             case "Snajzd":
-            case "Q-Vote":
+            case "Q-Voter":
             case "Majority Rule":
             case "Cognitive Opinion Dynamics":
                 addFieldsToForm("Variable 1");
