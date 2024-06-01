@@ -4,6 +4,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -28,7 +29,7 @@ public class SimulateView extends VerticalLayout {
 
     public SimulateView() {
         // Intestazione
-        H1 header = new H1("Simulation Page");
+        H2 header = new H2("Simulation Page");
         header.getStyle().set("color", "black");
         header.getStyle().set("font-weight", "bold");
 
@@ -49,7 +50,7 @@ public class SimulateView extends VerticalLayout {
         specificModelComboBox.getStyle().set("min-width", "280px");  // Imposta una larghezza minima per il ComboBox
         specificModelComboBox.addClassName("custom-combobox");  // Aggiunge la classe CSS personalizzata
 
-        // Layout verticale per i due menù a tendina
+        // Layout verticale per i menù a tendina
         VerticalLayout comboBoxLayout = new VerticalLayout(modelTypeComboBox, specificModelComboBox);
         comboBoxLayout.setAlignItems(Alignment.START);
         comboBoxLayout.setSpacing(false);
@@ -68,12 +69,15 @@ public class SimulateView extends VerticalLayout {
         modelDescriptionArea.setWidthFull();
         modelDescriptionArea.setVisible(false); // Nascondi inizialmente
 
-        // Layout orizzontale per i menù a tendina e il form
-        HorizontalLayout comboBoxAndFormLayout = new HorizontalLayout(comboBoxLayout, formLayout);
-        comboBoxAndFormLayout.setAlignItems(Alignment.START);
-        comboBoxAndFormLayout.setWidthFull();
-        comboBoxAndFormLayout.setFlexGrow(1, comboBoxLayout);
-        comboBoxAndFormLayout.setFlexGrow(2, formLayout);
+        // Layout orizzontale per menù a tendina, form delle variabili e descrizione del modello
+        HorizontalLayout contentLayout = new HorizontalLayout(comboBoxLayout, formLayout, modelDescriptionArea);
+        contentLayout.setAlignItems(Alignment.START);
+        contentLayout.setWidthFull();
+        contentLayout.setSpacing(true);
+        contentLayout.setPadding(false);
+        contentLayout.setFlexGrow(1, comboBoxLayout);
+        contentLayout.setFlexGrow(1, formLayout);
+        contentLayout.setFlexGrow(1, modelDescriptionArea);
 
         // Area di testo per mostrare i valori del modello scelto
         outputArea = new TextArea("Model & Parameters of the Simulation");
@@ -87,7 +91,7 @@ public class SimulateView extends VerticalLayout {
         runSimulationButton.setVisible(false); // Nascondi inizialmente
 
         // Layout principale
-        VerticalLayout mainLayout = new VerticalLayout(header, comboBoxAndFormLayout, modelDescriptionArea);
+        VerticalLayout mainLayout = new VerticalLayout(header, contentLayout);
         mainLayout.setAlignItems(Alignment.START);
         mainLayout.setWidthFull();
 
@@ -157,9 +161,8 @@ public class SimulateView extends VerticalLayout {
         }
 
         // Aggiungere un bottone per l'invio
-        Button submitButton = new Button("Save Parameters", e -> {
-            printSelectedModelValues();
-            runSimulationButton.setVisible(true); // Mostra il bottone "Run Simulation"
+        Button submitButton = new Button("Save Configuration", e -> {
+            simulateLoadingAndScroll();
         });
         formLayout.add(submitButton);
     }
@@ -174,7 +177,7 @@ public class SimulateView extends VerticalLayout {
 
     private void printSelectedModelValues() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Diffusion Methods type: ").append(modelTypeComboBox.getValue()).append("\n");
+        sb.append("1. Diffusion Methods type: ").append(modelTypeComboBox.getValue()).append("\n");
         sb.append("Types of model: ").append(specificModelComboBox.getValue()).append("\n");
 
         for (com.vaadin.flow.component.Component component : formLayout.getChildren().toArray(com.vaadin.flow.component.Component[]::new)) {
@@ -185,6 +188,27 @@ public class SimulateView extends VerticalLayout {
         }
         outputArea.setValue(sb.toString());
         outputArea.setVisible(true); // Mostra l'area di testo con i parametri salvati
+    }
+
+    private void simulateLoadingAndScroll() {
+        // Mostra un messaggio di caricamento
+        Span loadingMessage = new Span("Loading...");
+        loadingMessage.getStyle().set("font-size", "20px");
+        add(loadingMessage);
+
+        // Simula un'attesa di 3 secondi
+        getUI().ifPresent(ui -> ui.access(() -> {
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
+            remove(loadingMessage);
+            printSelectedModelValues();
+            runSimulationButton.setVisible(true); // Mostra il bottone "Run Simulation"
+            outputArea.getElement().callJsFunction("scrollIntoView");
+            ui.push();
+        }));
     }
 
     private void runSimulation() {
