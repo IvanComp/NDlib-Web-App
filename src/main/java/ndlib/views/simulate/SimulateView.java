@@ -36,7 +36,7 @@ public class SimulateView extends VerticalLayout {
 
         // Menù a tendina per la selezione del tipo di modello di diffusione
         modelTypeComboBox = new ComboBox<>("Diffusion Methods type");
-        modelTypeComboBox.setItems("Static Epidemic Models", "Dynamic Epidemic Models", "Opinion Models");
+        modelTypeComboBox.setItems("Static Epidemic Models", "Dynamic Epidemic Models", "Opinion Dynamic Models");
         modelTypeComboBox.addValueChangeListener(event -> {
             resetComponents();
             updateSpecificModelComboBox(event.getValue());
@@ -130,7 +130,7 @@ public class SimulateView extends VerticalLayout {
             case "Dynamic Epidemic Models":
                 specificModelComboBox.setItems("DynSI", "DynSIS", "DynSIR");
                 break;
-            case "Opinion Models":
+            case "Opinion Dynamic Models":
                 specificModelComboBox.setItems("Voter", "Snajzd", "Q-Vote", "Majority Rule", "Cognitive Opinion Dynamics");
                 break;
             default:
@@ -265,6 +265,12 @@ public class SimulateView extends VerticalLayout {
                 return "Node Profile: This model is a variation of the Threshold one, introduced in 2003. It assumes that the diffusion process is only apparent; each node decides to adopt or not a given behavior - once known its existence - only on the basis of its own interests. In this scenario, peer pressure is completely ruled out from the overall model: it is not important how many of its neighbors have adopted a specific behavior; if the node does not like it, it will not change its interests. Each node has its own profile describing how likely it is to accept a behavior similar to the one that is currently spreading. The diffusion process starts from a set of nodes that have already adopted a given behavior H: for each of the susceptible nodes in the neighborhood of a node u that has already adopted H, an unbalanced coin is flipped, the unbalance given by the personal profile of the susceptible node; if a positive result is obtained, the susceptible node will adopt the behavior.";
             case "Node Profile-Threshold":
                 return "Node Profile-Threshold: This model, still an extension of the Threshold one, assumes the existence of node profiles that act as preferential schemas for individual tastes but relax the constraints imposed by the Profile model by letting nodes be influenced via peer pressure mechanisms. Peer pressure is modeled with a threshold. The diffusion process starts from a set of nodes that have already adopted a given behavior H: for each of the susceptible nodes, an unbalanced coin is flipped if the percentage of its neighbors that are already infected exceeds its threshold. As in the Profile Model, the coin unbalance is given by the personal profile of the susceptible node; if a positive result is obtained, the susceptible node will adopt the behavior.";
+            case "DynSI":
+                return "DynSI: This model adapts the classical formulation of the SI model (where the transition is S → I) to the snapshot-based topology evolution where the network structure is updated during each iteration. The model applied at day t_i will then use as starting infected set the result of the iteration performed on the interaction graph of the previous day, and as social structure the current one. Such choice implies that not only the interactions of consecutive snapshots could vary but that the node sets can also differ.";
+            case "DynSIS":
+                return "DynSIS: As the DynSI dynamic model, the DynSIS adapts the classical formulation of the SIS model (where the transition is S → I → S) to the snapshot-based topology evolution where the network structure is updated during each iteration. The DynSIS implementation assumes that the process occurs on a directed/undirected dynamic network.";
+            case "DynSIR":
+                return "DynSIR: As the DynSIS dynamic model, the DynSIR adapts the classical formulation of the SIR model (where the transition is S → I → R) to the snapshot-based topology evolution where the network structure is updated during each iteration. The DynSIR implementation assumes that the process occurs on a directed/undirected dynamic network.";
             default:
                 return null;
         }
