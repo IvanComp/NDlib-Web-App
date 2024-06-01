@@ -79,7 +79,7 @@ public class MainLayout extends AppLayout {
         Div layout = new Div();
         layout.addClassNames(Display.FLEX, AlignItems.CENTER, Padding.Horizontal.LARGE);
 
-        H1 appName = new H1("NDLib");
+        H1 appName = new H1("NDLib Web-App \uD83D\uDC7D");
         appName.addClassNames(Margin.Vertical.MEDIUM, Margin.End.AUTO, FontSize.LARGE);
         appName.getStyle().set("color", "black");
         appName.getStyle().set("font-weight", "bold");
