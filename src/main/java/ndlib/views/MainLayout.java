@@ -81,10 +81,13 @@ public class MainLayout extends AppLayout {
 
         H1 appName = new H1("NDLib");
         appName.addClassNames(Margin.Vertical.MEDIUM, Margin.End.AUTO, FontSize.LARGE);
+        appName.getStyle().set("color", "black");
+        appName.getStyle().set("font-weight", "bold");
         layout.add(appName);
 
         Nav nav = new Nav();
         nav.addClassNames(Display.FLEX, Overflow.AUTO, Padding.Horizontal.MEDIUM, Padding.Vertical.XSMALL);
+        nav.getStyle().set("border-bottom", "2px solid black"); // Imposta la riga nera sotto i bottoni
 
         // Wrap the links in a list; improves accessibility
         UnorderedList list = new UnorderedList();
@@ -93,7 +96,6 @@ public class MainLayout extends AppLayout {
 
         for (MenuItemInfo menuItem : createMenuItems()) {
             list.add(menuItem);
-
         }
 
         header.add(layout, nav);
