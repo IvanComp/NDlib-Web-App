@@ -81,13 +81,13 @@ public class MainLayout extends AppLayout {
 
         H1 appName = new H1("NDLib Web-App \uD83D\uDC7D");
         appName.addClassNames(Margin.Vertical.MEDIUM, Margin.End.AUTO, FontSize.LARGE);
-        appName.getStyle().set("color", "black");
+        appName.getStyle().set("color", "#634227");
         appName.getStyle().set("font-weight", "bold");
         layout.add(appName);
 
         Nav nav = new Nav();
         nav.addClassNames(Display.FLEX, Overflow.AUTO, Padding.Horizontal.MEDIUM, Padding.Vertical.XSMALL);
-        nav.getStyle().set("border-bottom", "2px solid black"); // Imposta la riga nera sotto i bottoni
+        nav.getStyle().set("border-bottom", "2px solid #634227"); // Imposta la riga nera sotto i bottoni
 
         // Wrap the links in a list; improves accessibility
         UnorderedList list = new UnorderedList();

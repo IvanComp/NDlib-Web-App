@@ -5,6 +5,7 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -30,8 +31,8 @@ public class SimulateView extends VerticalLayout {
 
     public SimulateView() {
         // Intestazione
-        H1 header = new H1("Simulation Page");
-        header.getStyle().set("color", "black");
+        H2 header = new H2("Simulation");
+        header.getStyle().set("color", "#634227");
         header.getStyle().set("font-weight", "bold");
 
         // Menù a tendina per la selezione del tipo di modello di diffusione
@@ -65,7 +66,7 @@ public class SimulateView extends VerticalLayout {
         formLayout = new FormLayout();
         formLayout.setResponsiveSteps(
                 new FormLayout.ResponsiveStep("0", 1),
-                new FormLayout.ResponsiveStep("600px", 1)
+                new FormLayout.ResponsiveStep("800px", 1)
         );
 
         // TextArea per la descrizione del modello selezionato
@@ -271,6 +272,16 @@ public class SimulateView extends VerticalLayout {
                 return "DynSIS: As the DynSI dynamic model, the DynSIS adapts the classical formulation of the SIS model (where the transition is S → I → S) to the snapshot-based topology evolution where the network structure is updated during each iteration. The DynSIS implementation assumes that the process occurs on a directed/undirected dynamic network.";
             case "DynSIR":
                 return "DynSIR: As the DynSIS dynamic model, the DynSIR adapts the classical formulation of the SIR model (where the transition is S → I → R) to the snapshot-based topology evolution where the network structure is updated during each iteration. The DynSIR implementation assumes that the process occurs on a directed/undirected dynamic network.";
+            case "Voter":
+                return "Voter: As the DynSIS dynamic model, the DynSIR adapts the classical formulation of the SIR model (where the transition is S → I → R) to the snapshot-based topology evolution where the network structure is updated during each iteration. The DynSIR implementation assumes that the process occurs on a directed/undirected dynamic network.";
+            case "Snajzd":
+                return "Snajzd: As the DynSIS dynamic model, the DynSIR adapts the classical formulation of the SIR model (where the transition is S → I → R) to the snapshot-based topology evolution where the network structure is updated during each iteration. The DynSIR implementation assumes that the process occurs on a directed/undirected dynamic network.";
+            case "Q-Voter":
+                return "Q-Voter: As the DynSIS dynamic model, the DynSIR adapts the classical formulation of the SIR model (where the transition is S → I → R) to the snapshot-based topology evolution where the network structure is updated during each iteration. The DynSIR implementation assumes that the process occurs on a directed/undirected dynamic network.";
+            case "Majority Rule":
+                return "Majority Rule: As the DynSIS dynamic model, the DynSIR adapts the classical formulation of the SIR model (where the transition is S → I → R) to the snapshot-based topology evolution where the network structure is updated during each iteration. The DynSIR implementation assumes that the process occurs on a directed/undirected dynamic network.";
+            case "Cognitive Opinion Dynamics":
+                return "Cognitive Opinion Dynamics: As the DynSIS dynamic model, the DynSIR adapts the classical formulation of the SIR model (where the transition is S → I → R) to the snapshot-based topology evolution where the network structure is updated during each iteration. The DynSIR implementation assumes that the process occurs on a directed/undirected dynamic network.";
             default:
                 return null;
         }
