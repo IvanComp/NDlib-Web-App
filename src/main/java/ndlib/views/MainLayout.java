@@ -27,6 +27,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
 import com.vaadin.flow.theme.lumo.LumoUtility.Whitespace;
 import com.vaadin.flow.theme.lumo.LumoUtility.Width;
 import ndlib.views.about.AboutView;
+import ndlib.views.github.GithubView;
 import ndlib.views.simulate.SimulateView;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
@@ -104,6 +105,8 @@ public class MainLayout extends AppLayout {
                 new MenuItemInfo("Simulate", LineAwesomeIcon.PROJECT_DIAGRAM_SOLID.create(), SimulateView.class), //
 
                 new MenuItemInfo("About", LineAwesomeIcon.FILE.create(), AboutView.class), //
+
+                new MenuItemInfo("Github", LineAwesomeIcon.GITHUB.create(), GithubView.class),
 
         };
     }

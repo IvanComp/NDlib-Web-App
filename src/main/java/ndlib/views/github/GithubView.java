@@ -1,4 +1,4 @@
-package ndlib.views.simulate;
+package ndlib.views.github;
 
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
@@ -6,13 +6,14 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import ndlib.views.MainLayout;
 
-@PageTitle("Simulate")
-@Route(value = "", layout = MainLayout.class)
+@PageTitle("Github")
+@Route(value = "github", layout = MainLayout.class)
 @RouteAlias(value = "", layout = MainLayout.class)
-public class SimulateView  extends VerticalLayout {
+
+public class GithubView  extends VerticalLayout {
 
 
-    public SimulateView() {
+    public GithubView() {
 
     }
 
