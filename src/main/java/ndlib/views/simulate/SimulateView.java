@@ -32,7 +32,7 @@ public class SimulateView extends VerticalLayout {
 
     public SimulateView() {
         // Intestazione
-        H2 header = new H2("Simulation");
+        H2 header = new H2("Simulation Configuration");
         header.getStyle().set("color", "#634227");
         header.getStyle().set("font-weight", "bold");
 
@@ -56,6 +56,7 @@ public class SimulateView extends VerticalLayout {
         });
         specificModelComboBox.getStyle().set("min-width", "280px");
         specificModelComboBox.addClassName("custom-combobox");
+
 
         // Layout verticale per i menù a tendina
         VerticalLayout comboBoxLayout = new VerticalLayout(modelTypeComboBox, specificModelComboBox);
@@ -96,6 +97,7 @@ public class SimulateView extends VerticalLayout {
         runSimulationButton = new Button("Run Simulation", e -> runSimulation());
         runSimulationButton.setWidthFull();
         runSimulationButton.setVisible(false);
+        runSimulationButton.getStyle().set("cursor", "pointer");
 
         // Layout principale
         VerticalLayout mainLayout = new VerticalLayout(header, contentLayout);
@@ -150,7 +152,11 @@ public class SimulateView extends VerticalLayout {
 
         switch (model) {
             case "SI":
+                addFieldsToForm("Alfa", "Beta");
+                break;
             case "SIR":
+                addFieldsToForm("Alfa", "Beta", "Gamma");
+                break;
             case "SIS":
             case "SEIS":
             case "SWIR":
@@ -159,7 +165,7 @@ public class SimulateView extends VerticalLayout {
             case "Independent Cascades":
             case "Node Profile":
             case "Node Profile-Threshold":
-                addFieldsToForm("Variable 1", "Variable 2", "Variable 3");
+                addFieldsToForm("Alfa", "Beta", "Gamma");
                 break;
             case "DynSI":
             case "DynSIS":
@@ -176,10 +182,11 @@ public class SimulateView extends VerticalLayout {
         }
 
         // Aggiungere un bottone per l'invio
-        Button submitButton = new Button("Save Parameters", e -> {
+        Button submitButton = new Button("Save Configuration", e -> {
             simulateLoadingAndScroll();
         });
         formLayout.add(submitButton);
+        submitButton.getStyle().set("cursor", "pointer");
     }
 
     private void addFieldsToForm(String... fieldNames) {
@@ -215,7 +222,7 @@ public class SimulateView extends VerticalLayout {
         // Simula un'attesa di 3 secondi
         getUI().ifPresent(ui -> ui.access(() -> {
             try {
-                Thread.sleep(3000);
+                Thread.sleep(1000);
             } catch (InterruptedException ex) {
                 ex.printStackTrace();
             }
@@ -245,7 +252,7 @@ public class SimulateView extends VerticalLayout {
         // Simula un'attesa di 3 secondi
         getUI().ifPresent(ui -> ui.access(() -> {
             try {
-                Thread.sleep(3000);
+                Thread.sleep(1000);
             } catch (InterruptedException ex) {
                 ex.printStackTrace();
             }

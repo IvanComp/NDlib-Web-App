@@ -24,3 +24,16 @@ header nav a[highlight] vaadin-icon {
 header nav a[highlight] {
   background-color: var(--lumo-primary-color-10pct);
 }
+
+.custom-combobox {
+  --vaadin-combo-box-overlay: {
+    --vaadin-item: {
+      cursor: pointer;
+    };
+  };
+  cursor: pointer;
+}
+
+.custom-combobox::part(menu-item) {
+  cursor: pointer;
+}
