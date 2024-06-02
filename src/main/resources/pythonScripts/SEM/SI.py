@@ -9,10 +9,10 @@ import os
 try:
     # Get parameters from command line arguments
     beta = float(sys.argv[1])
-    gamma = float(sys.argv[2])
+    fraction_infected = float(sys.argv[2])
 
     # Print only the received parameters
-    print(f"Parameters received - alfa: {alfa}, beta: {beta}")
+    print(f"Parameters received - beta: {beta}, fraction_infected: {fraction_infected}")
 
     # Network Definition
     g = nx.erdos_renyi_graph(1000, 0.1)
@@ -22,8 +22,8 @@ try:
 
     # Model Configuration
     config = mc.Configuration()
-    config.add_model_parameter('alfa', alfa)
     config.add_model_parameter('beta', beta)
+    config.add_model_parameter("fraction_infected", fraction_infected)
     model.set_initial_status(config)
 
     # Simulation
@@ -42,11 +42,9 @@ try:
     trends_data = trends[0]['trends']
     susceptible = trends_data['node_count'][0]
     infected = trends_data['node_count'][1]
-    removed = trends_data['node_count'][2]
 
     p.line(list(range(len(susceptible))), susceptible, color='blue', legend_label='Susceptible')
     p.line(list(range(len(infected))), infected, color='green', legend_label='Infected')
-    p.line(list(range(len(removed))), removed, color='red', legend_label='Removed')
 
     save(p)
 except Exception as e:
