@@ -27,6 +27,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
 import com.vaadin.flow.theme.lumo.LumoUtility.Whitespace;
 import com.vaadin.flow.theme.lumo.LumoUtility.Width;
 import ndlib.views.about.AboutView;
+import ndlib.views.create.CreateModelView;
 import ndlib.views.github.GithubView;
 import ndlib.views.simulate.SimulateView;
 import org.vaadin.lineawesome.LineAwesomeIcon;
@@ -105,6 +106,8 @@ public class MainLayout extends AppLayout {
     private MenuItemInfo[] createMenuItems() {
         return new MenuItemInfo[]{ //
                 new MenuItemInfo("Simulate", LineAwesomeIcon.PROJECT_DIAGRAM_SOLID.create(), SimulateView.class), //
+
+                new MenuItemInfo("Create Custom Model", LineAwesomeIcon.PLUS_SQUARE_SOLID.create(), CreateModelView.class),
 
                 new MenuItemInfo("About", LineAwesomeIcon.FILE.create(), AboutView.class), //
 

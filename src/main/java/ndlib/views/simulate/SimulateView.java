@@ -15,6 +15,7 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
+import com.vaadin.flow.server.VaadinSession;
 import ndlib.views.MainLayout;
 
 @PageTitle("Simulate")
@@ -197,7 +198,7 @@ public class SimulateView extends VerticalLayout {
         for (com.vaadin.flow.component.Component component : formLayout.getChildren().toArray(com.vaadin.flow.component.Component[]::new)) {
             if (component instanceof TextField) {
                 TextField textField = (TextField) component;
-                sb.append(textField.getLabel()).append(": ").append(textField.getValue()).append("<br>");
+                sb.append("<b><span style='color:black;'>").append(textField.getLabel()).append(":</span></b> ").append(textField.getValue()).append("<br>");
             }
         }
         outputDiv.setText(sb.toString());
@@ -227,10 +228,20 @@ public class SimulateView extends VerticalLayout {
     }
 
     private void runSimulation() {
-        // Implementa la logica per eseguire la simulazione
-        Span content = new Span("Running simulation with the current parameters...");
-        com.vaadin.flow.component.dialog.Dialog dialog = new com.vaadin.flow.component.dialog.Dialog(content);
-        dialog.open();
+        // Salva le informazioni di simulazione nella sessione
+        VaadinSession.getCurrent().setAttribute("simulationResult", outputDiv.getText());
+
+        // Simula un'attesa di 3 secondi
+        getUI().ifPresent(ui -> ui.access(() -> {
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
+
+            // Naviga alla pagina postSimulationView
+            ui.navigate("postSim");
+        }));
     }
 
     private void updateModelDescription(String model) {
