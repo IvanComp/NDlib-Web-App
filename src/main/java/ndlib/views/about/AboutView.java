@@ -17,13 +17,13 @@ public class AboutView extends VerticalLayout {
         setSpacing(false);
 
         Image img = new Image("images/empty-plant.png", "placeholder plant");
-        img.setWidth("200px");
+        img.setWidth("100px");
         add(img);
 
         H2 header = new H2("TODO");
         header.addClassNames(Margin.Top.XLARGE, Margin.Bottom.MEDIUM);
         add(header);
-        add(new Paragraph("TODO 🤗"));
+        add(new Paragraph("🤗"));
 
         setSizeFull();
         setJustifyContentMode(JustifyContentMode.CENTER);

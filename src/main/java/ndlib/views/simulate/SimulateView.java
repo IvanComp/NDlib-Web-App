@@ -43,8 +43,8 @@ public class SimulateView extends VerticalLayout {
             resetComponents();
             updateSpecificModelComboBox(event.getValue());
         });
-        modelTypeComboBox.getStyle().set("min-width", "280px");  // Imposta una larghezza minima per il ComboBox
-        modelTypeComboBox.addClassName("custom-combobox");  // Aggiunge la classe CSS personalizzata
+        modelTypeComboBox.getStyle().set("min-width", "280px");
+        modelTypeComboBox.addClassName("custom-combobox");
 
         // Menù a tendina per la selezione del tipo specifico di modello
         specificModelComboBox = new ComboBox<>("Types of model");
@@ -54,8 +54,8 @@ public class SimulateView extends VerticalLayout {
             updateForm(event.getValue());
             updateModelDescription(event.getValue());
         });
-        specificModelComboBox.getStyle().set("min-width", "280px");  // Imposta una larghezza minima per il ComboBox
-        specificModelComboBox.addClassName("custom-combobox");  // Aggiunge la classe CSS personalizzata
+        specificModelComboBox.getStyle().set("min-width", "280px");
+        specificModelComboBox.addClassName("custom-combobox");
 
         // Layout verticale per i menù a tendina
         VerticalLayout comboBoxLayout = new VerticalLayout(modelTypeComboBox, specificModelComboBox);
@@ -74,7 +74,7 @@ public class SimulateView extends VerticalLayout {
         modelDescriptionArea = new TextArea("Model Description");
         modelDescriptionArea.setReadOnly(true);
         modelDescriptionArea.setWidthFull();
-        modelDescriptionArea.setVisible(false); // Nascondi inizialmente
+        modelDescriptionArea.setVisible(false);
 
         // Layout orizzontale per menù a tendina, form delle variabili e descrizione del modello
         HorizontalLayout contentLayout = new HorizontalLayout(comboBoxLayout, formLayout, modelDescriptionArea);
@@ -90,12 +90,12 @@ public class SimulateView extends VerticalLayout {
         outputDiv = new Div();
         outputDiv.setWidthFull();
         outputDiv.getStyle().set("white-space", "pre-wrap");
-        outputDiv.setVisible(false); // Nascondi inizialmente
+        outputDiv.setVisible(false);
 
         // Bottone per eseguire la simulazione
         runSimulationButton = new Button("Run Simulation", e -> runSimulation());
         runSimulationButton.setWidthFull();
-        runSimulationButton.setVisible(false); // Nascondi inizialmente
+        runSimulationButton.setVisible(false);
 
         // Layout principale
         VerticalLayout mainLayout = new VerticalLayout(header, contentLayout);
@@ -143,7 +143,7 @@ public class SimulateView extends VerticalLayout {
 
     private void updateForm(String model) {
         formLayout.removeAll();
-        modelDescriptionArea.setVisible(true); // Mostra la descrizione del modello
+        modelDescriptionArea.setVisible(true);
         if (model == null) {
             return;
         }
@@ -185,7 +185,7 @@ public class SimulateView extends VerticalLayout {
     private void addFieldsToForm(String... fieldNames) {
         for (String fieldName : fieldNames) {
             TextField textField = new TextField(fieldName);
-            textField.setId(fieldName.replace(" ", "").toLowerCase()); // Imposta un ID univoco per ogni campo
+            textField.setId(fieldName.replace(" ", "").toLowerCase());
             formLayout.add(textField);
         }
     }
@@ -202,7 +202,7 @@ public class SimulateView extends VerticalLayout {
             }
         }
         outputDiv.setText(sb.toString());
-        outputDiv.setVisible(true); // Mostra il Div con i parametri salvati
+        outputDiv.setVisible(true);
         outputDiv.getElement().setProperty("innerHTML", sb.toString());
     }
 
@@ -221,7 +221,7 @@ public class SimulateView extends VerticalLayout {
             }
             remove(loadingMessage);
             printSelectedModelValues();
-            runSimulationButton.setVisible(true); // Mostra il bottone "Run Simulation"
+            runSimulationButton.setVisible(true);
             outputDiv.getElement().callJsFunction("scrollIntoView");
             ui.push();
         }));
@@ -229,7 +229,18 @@ public class SimulateView extends VerticalLayout {
 
     private void runSimulation() {
         // Salva le informazioni di simulazione nella sessione
-        VaadinSession.getCurrent().setAttribute("simulationResult", outputDiv.getText());
+        VaadinSession.getCurrent().setAttribute("diffusionMethodsType", modelTypeComboBox.getValue());
+        VaadinSession.getCurrent().setAttribute("typesOfModel", specificModelComboBox.getValue());
+
+        // Salva le variabili della simulazione
+        StringBuilder simulationParams = new StringBuilder();
+        for (com.vaadin.flow.component.Component component : formLayout.getChildren().toArray(com.vaadin.flow.component.Component[]::new)) {
+            if (component instanceof TextField) {
+                TextField textField = (TextField) component;
+                simulationParams.append(textField.getLabel()).append(": ").append(textField.getValue()).append("<br>");
+            }
+        }
+        VaadinSession.getCurrent().setAttribute("simulationParameters", simulationParams.toString());
 
         // Simula un'attesa di 3 secondi
         getUI().ifPresent(ui -> ui.access(() -> {
