@@ -1,14 +1,14 @@
 package ndlib.views.postSim;
 
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.Html;
-import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import ndlib.views.MainLayout;
@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Arrays;
 
 @PageTitle("postSim")
@@ -63,12 +64,15 @@ public class postSimulationView extends VerticalLayout {
 
                     // Read and display the generated plot.html content
                     String plotHtmlContent = readPlotHtmlContent("src/main/resources/pythonScripts/simulation/plot/plot.html");
-                    if (plotHtmlContent != null) {
+                    if (plotHtmlContent != null && !plotHtmlContent.isEmpty()) {
                         // Wrap the content in a single top-level <div> element
                         String wrappedHtmlContent = "<div>" + plotHtmlContent + "</div>";
                         // Create a Html component with the wrapped plot.html content
                         Html plotHtml = new Html(wrappedHtmlContent);
                         add(plotHtml);
+
+                        // Add download buttons
+                        addDownloadButtons();
                     } else {
                         simulationResults.setText("Plot HTML content not found.");
                     }
@@ -191,6 +195,34 @@ public class postSimulationView extends VerticalLayout {
         } catch (Exception e) {
             logger.error("Exception occurred while running the script", e);
             return "Exception occurred while running the script: " + e.getMessage();
+        }
+    }
+
+    private void addDownloadButtons() {
+        // Ensure file paths
+        Path csvFilePath = Paths.get("src/main/resources/pythonScripts/simulation/data/simulation_data.csv");
+        Path plotFilePath = Paths.get("src/main/resources/pythonScripts/simulation/plot/plot.html");
+
+        if (Files.exists(csvFilePath) && Files.exists(plotFilePath)) {
+            // Create download buttons
+            Anchor downloadCsvButton = new Anchor("/src/main/resources/pythonScripts/simulation/data/simulation_data.csv", "Download CSV");
+            downloadCsvButton.getElement().setAttribute("download", true);
+            downloadCsvButton.getStyle().set("margin-top", "20px");
+            downloadCsvButton.getStyle().set("display", "block");
+
+            Anchor downloadImageButton = new Anchor("/src/main/resources/pythonScripts/simulation/plot/plot.html", "Download Plot Image");
+            downloadImageButton.getElement().setAttribute("download", true);
+            downloadImageButton.getStyle().set("margin-top", "20px");
+            downloadImageButton.getStyle().set("display", "block");
+
+            add(downloadCsvButton, downloadImageButton);
+        } else {
+            if (!Files.exists(csvFilePath)) {
+                logger.error("CSV file not found at " + csvFilePath.toString());
+            }
+            if (!Files.exists(plotFilePath)) {
+                logger.error("Plot file not found at " + plotFilePath.toString());
+            }
         }
     }
 }
