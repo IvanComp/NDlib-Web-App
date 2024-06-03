@@ -3,6 +3,7 @@ import networkx as nx
 import ndlib.models.epidemics as ep
 from bokeh.io import output_file, save
 from bokeh.plotting import figure
+import pandas as pd
 import ndlib.models.ModelConfig as mc
 import os
 
@@ -13,7 +14,7 @@ try:
     fraction_infected = float(sys.argv[3])
 
     # Print only the received parameters
-    print(f"Parameters received - beta: {beta}, gamma: {gamma}, fraction_infected: {fraction_infected}")
+    # print(f"Parameters received - beta: {beta}, gamma: {gamma}, fraction_infected: {fraction_infected}")
 
     # Network Definition
     g = nx.erdos_renyi_graph(1000, 0.1)
@@ -33,8 +34,12 @@ try:
     trends = model.build_trends(iterations)
 
     # Ensure the plot directory exists
-    plot_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../plot")
+    plot_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../simulation/plot")
     os.makedirs(plot_directory, exist_ok=True)
+
+    # Ensure the data directory exists
+    data_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../simulation/data")
+    os.makedirs(data_directory, exist_ok=True)
 
     # Manual Plotting
     output_file(os.path.join(plot_directory, "plot.html"))
@@ -51,6 +56,20 @@ try:
     p.line(list(range(len(removed))), removed, color='red', legend_label='Removed')
 
     save(p)
+
+    # Creating a DataFrame
+    data = {
+        'Iteration': list(range(len(susceptible))),
+        'Susceptible': susceptible,
+        'Infected': infected,
+        'Removed': removed
+    }
+    df = pd.DataFrame(data)
+
+    # Saving the DataFrame to a CSV file
+    csv_file_path = os.path.join(data_directory, "simulation_data.csv")
+    df.to_csv(csv_file_path, index=False)
+
 except Exception as e:
     print(f"An error occurred: {e}")
     sys.exit(1)

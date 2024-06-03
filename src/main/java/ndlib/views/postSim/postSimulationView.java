@@ -62,7 +62,7 @@ public class postSimulationView extends VerticalLayout {
                     add(scriptOutputDiv);
 
                     // Read and display the generated plot.html content
-                    String plotHtmlContent = readPlotHtmlContent("src/main/resources/pythonScripts/plot/plot.html");
+                    String plotHtmlContent = readPlotHtmlContent("src/main/resources/pythonScripts/simulation/plot/plot.html");
                     if (plotHtmlContent != null) {
                         // Wrap the content in a single top-level <div> element
                         String wrappedHtmlContent = "<div>" + plotHtmlContent + "</div>";
