@@ -6,6 +6,7 @@ import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.Text;
@@ -13,26 +14,39 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.component.html.Image;
 import ndlib.views.MainLayout;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
+import org.knowm.xchart.BitmapEncoder;
+import org.knowm.xchart.XYChart;
+import org.knowm.xchart.XYChartBuilder;
+import org.knowm.xchart.style.markers.SeriesMarkers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
+import java.util.*;
 
 @PageTitle("postSim")
 @Route(value = "postSim", layout = MainLayout.class)
 public class postSimulationView extends VerticalLayout {
 
     private static final Logger logger = LoggerFactory.getLogger(postSimulationView.class);
+    private HorizontalLayout mainLayout;
+    private Div simulationResults;
 
     public postSimulationView() {
-        Div simulationResults = new Div();
+        // Add title
+        add(new Html("<h1>Result of the Simulation</h1>"));
+
+        // Container for results and chart
+        mainLayout = new HorizontalLayout();
+        add(mainLayout);
+
+        simulationResults = new Div();
 
         String diffusionMethodsType = (String) VaadinSession.getCurrent().getAttribute("diffusionMethodsType");
         String typesOfModel = (String) VaadinSession.getCurrent().getAttribute("typesOfModel");
@@ -46,9 +60,11 @@ public class postSimulationView extends VerticalLayout {
 
         try {
             StringBuilder sb = new StringBuilder();
-            sb.append("<b>Diffusion Methods Type:</b> ").append(diffusionMethodsType).append("<br>");
-            sb.append("<b>Types of Model:</b> ").append(typesOfModel).append("<br>");
-            sb.append(simulationParameters);
+            sb.append("<b>Diffusion Methods Type:</b> ")
+                    .append(diffusionMethodsType).append("<br>")
+                    .append("<b>Types of Model:</b> ")
+                    .append(typesOfModel).append("<br>")
+                    .append(simulationParameters);
 
             simulationResults.getElement().setProperty("innerHTML", sb.toString());
 
@@ -73,6 +89,7 @@ public class postSimulationView extends VerticalLayout {
                         add(plotHtml);
 
                         // Add download buttons
+                        displayChartFromCSV("src/main/resources/pythonScripts/simulation/data/simulation_data.csv");
                         addDownloadButtons();
                     } else {
                         simulationResults.setText("Plot HTML content not found.");
@@ -88,7 +105,7 @@ public class postSimulationView extends VerticalLayout {
             simulationResults.setText("An error occurred: " + e.getMessage());
         }
 
-        add(simulationResults);
+        mainLayout.add(simulationResults);
 
         // Create and add the transparent button with the home icon
         Button homeButton = new Button(new Icon("vaadin", "home"));
@@ -122,14 +139,14 @@ public class postSimulationView extends VerticalLayout {
         Dialog dialog = new Dialog();
         dialog.add(new Text("Do you want to return to the home page?"));
 
-        Button yesButton = new Button("Yes", event -> {
+        Button yesButton = createStyledButton("Yes", null);
+        yesButton.addClickListener(event -> {
             dialog.close();
             getUI().ifPresent(ui -> ui.navigate("simulate"));
         });
-        yesButton.getStyle().set("cursor", "pointer");
 
-        Button noButton = new Button("No", event -> dialog.close());
-        noButton.getStyle().set("cursor", "pointer");
+        Button noButton = createStyledButton("No", null);
+        noButton.addClickListener(event -> dialog.close());
 
         HorizontalLayout buttons = new HorizontalLayout(yesButton, noButton);
         dialog.add(buttons);
@@ -207,22 +224,111 @@ public class postSimulationView extends VerticalLayout {
 
             // Create StreamResource for CSV
             StreamResource csvResource = new StreamResource("simulation_data.csv", () -> new ByteArrayInputStream(csvContent));
-            Anchor downloadCsvButton = new Anchor(csvResource, "Download CSV");
-            downloadCsvButton.getElement().setAttribute("download", true);
-            downloadCsvButton.getStyle().set("margin-top", "20px");
-            downloadCsvButton.getStyle().set("display", "block");
+            Button csvButton = new Button("Download CSV", new Icon(VaadinIcon.FILE_TABLE));
+            csvButton.getElement().setAttribute("aria-label", "Download CSV");
+            styleButton(csvButton);
+
+            Anchor downloadCsvAnchor = new Anchor(csvResource, "");
+            downloadCsvAnchor.getElement().setAttribute("download", true);
+            downloadCsvAnchor.add(csvButton);
 
             // Create StreamResource for Plot
             StreamResource plotResource = new StreamResource("plot.html", () -> new ByteArrayInputStream(plotContent));
-            Anchor downloadImageButton = new Anchor(plotResource, "Download Plot Image");
-            downloadImageButton.getElement().setAttribute("download", true);
-            downloadImageButton.getStyle().set("margin-top", "20px");
-            downloadImageButton.getStyle().set("display", "block");
+            Button plotButton = new Button("Download Plot Image", new Icon(VaadinIcon.CHART_3D));
+            plotButton.getElement().setAttribute("aria-label", "Download Interactive Plot");
+            styleButton(plotButton);
+
+            Anchor downloadPlotAnchor = new Anchor(plotResource, "");
+            downloadPlotAnchor.getElement().setAttribute("download", true);
+            downloadPlotAnchor.add(plotButton);
 
             // Add buttons to layout
-            add(downloadCsvButton, downloadImageButton);
+            VerticalLayout downloadButtonsLayout = new VerticalLayout(downloadCsvAnchor, downloadPlotAnchor);
+            mainLayout.add(downloadButtonsLayout);
         } catch (IOException e) {
             logger.error("Error reading files for download", e);
         }
     }
+
+
+    private void displayChartFromCSV(String csvFilePath) {
+        try {
+            Reader in = new FileReader(csvFilePath);
+            Iterable<CSVRecord> records = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(in);
+
+            Map<String, List<Integer>> dataSeries = new LinkedHashMap<>();
+            List<Integer> iterations = new ArrayList<>();
+
+            for (CSVRecord record : records) {
+                if (iterations.isEmpty()) {
+                    for (String header : record.toMap().keySet()) {
+                        if (!header.equals("Iteration")) {
+                            dataSeries.put(header, new ArrayList<>());
+                        }
+                    }
+                }
+                iterations.add(Integer.parseInt(record.get("Iteration")));
+                for (Map.Entry<String, List<Integer>> entry : dataSeries.entrySet()) {
+                    entry.getValue().add(Integer.parseInt(record.get(entry.getKey())));
+                }
+            }
+
+            XYChart chart = new XYChartBuilder().width(800).height(600).title("Model Simulation").xAxisTitle("Iteration").yAxisTitle("Number of Nodes").build();
+            for (Map.Entry<String, List<Integer>> entry : dataSeries.entrySet()) {
+                chart.addSeries(entry.getKey(), iterations, entry.getValue()).setMarker(SeriesMarkers.NONE);
+            }
+
+            // Save chart as an image
+            BitmapEncoder.saveBitmap(chart, "src/main/resources/pythonScripts/simulation/plot/simulation_chart", BitmapEncoder.BitmapFormat.PNG);
+
+            // Display chart in Vaadin UI
+            StreamResource chartResource = new StreamResource("simulation_chart.png", () -> {
+                try {
+                    return new ByteArrayInputStream(Files.readAllBytes(Paths.get("src/main/resources/pythonScripts/simulation/plot/simulation_chart.png")));
+                } catch (IOException e) {
+                    logger.error("Error reading chart image file", e);
+                    return null;
+                }
+            });
+
+            Image chartImage = new Image(chartResource, "Simulation Chart");
+            chartImage.setWidth("800px");
+            chartImage.setHeight("600px");
+            mainLayout.add(chartImage, simulationResults);
+
+        } catch (IOException e) {
+            logger.error("Error reading CSV file", e);
+        }
+    }
+
+    private Button createStyledButton(String text, String icon) {
+        Button button;
+        if (icon != null) {
+            button = new Button(new Icon("vaadin", icon));
+        } else {
+            button = new Button(text);
+        }
+        button.getElement().setAttribute("aria-label", text);
+        styleButton(button);
+        return button;
+    }
+
+    private void styleButton(Button button) {
+        button.getStyle().set("color", "rgb(99, 66, 39)");
+        button.getStyle().set("border", "1px solid rgb(99, 66, 39)");
+        button.getStyle().set("background", "transparent");
+        button.getStyle().set("cursor", "pointer");
+        button.getStyle().set("padding", "10px");
+    }
+
+    private void styleButton(Anchor anchor) {
+        anchor.getStyle().set("color", "rgb(99, 66, 39)");
+        anchor.getStyle().set("border", "1px solid rgb(99, 66, 39)");
+        anchor.getStyle().set("background", "transparent");
+        anchor.getStyle().set("cursor", "pointer");
+        anchor.getStyle().set("padding", "10px");
+        anchor.getStyle().set("margin-top", "10px");
+        anchor.getStyle().set("display", "block");
+    }
 }
+
