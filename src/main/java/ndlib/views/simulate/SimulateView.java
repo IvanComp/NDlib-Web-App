@@ -4,10 +4,8 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -29,6 +27,7 @@ public class SimulateView extends VerticalLayout {
     private Div outputDiv;
     private TextArea modelDescriptionArea;
     private Button runSimulationButton;
+    private Div errorMessageDiv;
 
     public SimulateView() {
         // Intestazione
@@ -99,6 +98,12 @@ public class SimulateView extends VerticalLayout {
         runSimulationButton.setVisible(false);
         runSimulationButton.getStyle().set("cursor", "pointer");
 
+        // Messaggio di errore
+        errorMessageDiv = new Div();
+        errorMessageDiv.setVisible(false);
+        errorMessageDiv.getStyle().set("color", "red");
+        errorMessageDiv.getStyle().set("font-weight", "bold");
+
         // Layout principale
         VerticalLayout mainLayout = new VerticalLayout(header, contentLayout);
         mainLayout.setAlignItems(Alignment.START);
@@ -108,7 +113,7 @@ public class SimulateView extends VerticalLayout {
         add(mainLayout);
 
         // Aggiunta del Div e del pulsante di esecuzione in fondo alla pagina
-        VerticalLayout bottomLayout = new VerticalLayout(outputDiv, runSimulationButton);
+        VerticalLayout bottomLayout = new VerticalLayout(outputDiv, runSimulationButton, errorMessageDiv);
         bottomLayout.setAlignItems(Alignment.CENTER);
         bottomLayout.setWidthFull();
         add(bottomLayout);
@@ -120,6 +125,8 @@ public class SimulateView extends VerticalLayout {
         outputDiv.setVisible(false);
         runSimulationButton.setVisible(false);
         outputDiv.setText("");
+        errorMessageDiv.setVisible(false);
+        errorMessageDiv.setText("");
     }
 
     private void updateSpecificModelComboBox(String modelType) {
@@ -141,6 +148,19 @@ public class SimulateView extends VerticalLayout {
                 specificModelComboBox.setVisible(false);
                 break;
         }
+    }
+
+    private void hideErrorMessageAfterDelay() {
+        // Simula l'attesa di 3 secondi
+        getUI().ifPresent(ui -> ui.access(() -> {
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
+            errorMessageDiv.setVisible(false);
+            ui.push();
+        }));
     }
 
     private void updateForm(String model) {
@@ -170,20 +190,25 @@ public class SimulateView extends VerticalLayout {
             case "DynSI":
             case "DynSIS":
             case "DynSIR":
-                addFieldsToForm("Variable 1", "Variable 2", "Variable 3", "Variable 4");
+                addFieldsToForm("Alfa", "Beta", "Gamma","Delta");
                 break;
             case "Voter":
             case "Snajzd":
             case "Q-Voter":
             case "Majority Rule":
             case "Cognitive Opinion Dynamics":
-                addFieldsToForm("Variable 1");
+                addFieldsToForm("Alfa", "Beta", "Gamma","Delta","Omega");
                 break;
         }
 
         // Aggiungere un bottone per l'invio
         Button submitButton = new Button("Save Configuration", e -> {
-            simulateLoadingAndScroll();
+            if (validateInputs()) {
+                simulateLoadingAndScroll();
+                hideErrorMessageAfterDelay();
+            } else {
+                showError("Please enter values between 0 and 1 for all parameters.");
+            }
         });
         formLayout.add(submitButton);
         submitButton.getStyle().set("cursor", "pointer");
@@ -191,10 +216,49 @@ public class SimulateView extends VerticalLayout {
 
     private void addFieldsToForm(String... fieldNames) {
         for (String fieldName : fieldNames) {
-            TextField textField = new TextField(fieldName);
+            TextField textField = new TextField();
             textField.setId(fieldName.replace(" ", "").toLowerCase());
-            formLayout.add(textField);
+
+            Span labelSpan = new Span(fieldName);
+            Span floatRangeLabel = new Span("- float in [0, 1]");
+            floatRangeLabel.getStyle().set("font-size", "smaller");
+            floatRangeLabel.getStyle().set("color", "black");
+            floatRangeLabel.getStyle().set("margin-left", "5px");
+
+            HorizontalLayout labelLayout = new HorizontalLayout(labelSpan, floatRangeLabel);
+            labelLayout.setSpacing(false);
+            labelLayout.setMargin(false);
+            labelLayout.setAlignItems(Alignment.BASELINE);
+
+            VerticalLayout fieldLayout = new VerticalLayout(labelLayout, textField);
+            fieldLayout.setSpacing(false);
+            fieldLayout.setMargin(false);
+
+            formLayout.add(fieldLayout);
         }
+    }
+
+
+    private boolean validateInputs() {
+        for (com.vaadin.flow.component.Component component : formLayout.getChildren().toArray(com.vaadin.flow.component.Component[]::new)) {
+            if (component instanceof TextField) {
+                TextField textField = (TextField) component;
+                try {
+                    float value = Float.parseFloat(textField.getValue());
+                    if (value < 0 || value > 1) {
+                        return false;
+                    }
+                } catch (NumberFormatException e) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private void showError(String message) {
+        errorMessageDiv.setText(message);
+        errorMessageDiv.setVisible(true);
     }
 
     private void printSelectedModelValues() {
@@ -302,15 +366,15 @@ public class SimulateView extends VerticalLayout {
             case "DynSIR":
                 return "DynSIR: As the DynSIS dynamic model, the DynSIR adapts the classical formulation of the SIR model (where the transition is S → I → R) to the snapshot-based topology evolution where the network structure is updated during each iteration. The DynSIR implementation assumes that the process occurs on a directed/undirected dynamic network.";
             case "Voter":
-                return "Voter: As the DynSIS dynamic model, the DynSIR adapts the classical formulation of the SIR model (where the transition is S → I → R) to the snapshot-based topology evolution where the network structure is updated during each iteration. The DynSIR implementation assumes that the process occurs on a directed/undirected dynamic network.";
+                return "Voter: The Voter model is a simple model of opinion dynamics. In each time step, a randomly selected node adopts the state of a randomly selected neighbor. The process continues until a consensus is reached.";
             case "Snajzd":
-                return "Snajzd: As the DynSIS dynamic model, the DynSIR adapts the classical formulation of the SIR model (where the transition is S → I → R) to the snapshot-based topology evolution where the network structure is updated during each iteration. The DynSIR implementation assumes that the process occurs on a directed/undirected dynamic network.";
+                return "Snajzd: The Snajzd model is another opinion dynamics model where pairs of neighboring nodes are randomly selected, and if they agree on their opinion, they convince all their neighbors to adopt the same opinion.";
             case "Q-Voter":
-                return "Q-Voter: As the DynSIS dynamic model, the DynSIR adapts the classical formulation of the SIR model (where the transition is S → I → R) to the snapshot-based topology evolution where the network structure is updated during each iteration. The DynSIR implementation assumes that the process occurs on a directed/undirected dynamic network.";
+                return "Q-Voter: In the Q-Voter model, a node adopts the opinion of a randomly chosen group of q neighbors if all neighbors in the group share the same opinion. If they do not, the node can either adopt the opposite opinion or maintain its current one.";
             case "Majority Rule":
-                return "Majority Rule: As the DynSIS dynamic model, the DynSIR adapts the classical formulation of the SIR model (where the transition is S → I → R) to the snapshot-based topology evolution where the network structure is updated during each iteration. The DynSIR implementation assumes that the process occurs on a directed/undirected dynamic network.";
+                return "Majority Rule: In the Majority Rule model, a group of nodes is selected, and all nodes in the group adopt the majority opinion within the group. This process is repeated until a consensus is reached.";
             case "Cognitive Opinion Dynamics":
-                return "Cognitive Opinion Dynamics: As the DynSIS dynamic model, the DynSIR adapts the classical formulation of the SIR model (where the transition is S → I → R) to the snapshot-based topology evolution where the network structure is updated during each iteration. The DynSIR implementation assumes that the process occurs on a directed/undirected dynamic network.";
+                return "Cognitive Opinion Dynamics: This model includes cognitive factors in opinion dynamics, considering how individuals process and store information, as well as how they are influenced by others.";
             default:
                 return null;
         }
