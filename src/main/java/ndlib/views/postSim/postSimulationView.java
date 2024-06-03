@@ -1,27 +1,28 @@
 package ndlib.views.postSim;
 
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.Html;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import ndlib.views.MainLayout;
+import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.VaadinSession;
+import ndlib.views.MainLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.nio.file.Path;
 import java.util.Arrays;
 
 @PageTitle("postSim")
@@ -199,30 +200,29 @@ public class postSimulationView extends VerticalLayout {
     }
 
     private void addDownloadButtons() {
-        // Ensure file paths
-        Path csvFilePath = Paths.get("src/main/resources/pythonScripts/simulation/data/simulation_data.csv");
-        Path plotFilePath = Paths.get("src/main/resources/pythonScripts/simulation/plot/plot.html");
+        try {
+            // Load file content
+            byte[] csvContent = Files.readAllBytes(Paths.get("src/main/resources/pythonScripts/simulation/data/simulation_data.csv"));
+            byte[] plotContent = Files.readAllBytes(Paths.get("src/main/resources/pythonScripts/simulation/plot/plot.html"));
 
-        if (Files.exists(csvFilePath) && Files.exists(plotFilePath)) {
-            // Create download buttons
-            Anchor downloadCsvButton = new Anchor("/src/main/resources/pythonScripts/simulation/data/simulation_data.csv", "Download CSV");
+            // Create StreamResource for CSV
+            StreamResource csvResource = new StreamResource("simulation_data.csv", () -> new ByteArrayInputStream(csvContent));
+            Anchor downloadCsvButton = new Anchor(csvResource, "Download CSV");
             downloadCsvButton.getElement().setAttribute("download", true);
             downloadCsvButton.getStyle().set("margin-top", "20px");
             downloadCsvButton.getStyle().set("display", "block");
 
-            Anchor downloadImageButton = new Anchor("/src/main/resources/pythonScripts/simulation/plot/plot.html", "Download Plot Image");
+            // Create StreamResource for Plot
+            StreamResource plotResource = new StreamResource("plot.html", () -> new ByteArrayInputStream(plotContent));
+            Anchor downloadImageButton = new Anchor(plotResource, "Download Plot Image");
             downloadImageButton.getElement().setAttribute("download", true);
             downloadImageButton.getStyle().set("margin-top", "20px");
             downloadImageButton.getStyle().set("display", "block");
 
+            // Add buttons to layout
             add(downloadCsvButton, downloadImageButton);
-        } else {
-            if (!Files.exists(csvFilePath)) {
-                logger.error("CSV file not found at " + csvFilePath.toString());
-            }
-            if (!Files.exists(plotFilePath)) {
-                logger.error("Plot file not found at " + plotFilePath.toString());
-            }
+        } catch (IOException e) {
+            logger.error("Error reading files for download", e);
         }
     }
 }
