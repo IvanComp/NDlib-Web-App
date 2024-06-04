@@ -171,7 +171,7 @@ public class postSimulationView extends VerticalLayout {
     private String runPythonScript(String scriptPath, String simulationParameters) {
         try {
             // Ensure parameters are correctly formatted and remove any HTML tags and text labels
-            simulationParameters = simulationParameters.replaceAll("Alfa:|Beta:|Gamma:|<[^>]*>", "").trim();
+            simulationParameters = simulationParameters.replaceAll("Transmission Rate:|Recovery Rate:|Percentage Infected:|<[^>]*>", "").trim();
             System.out.println("Formatted Parameters: " + simulationParameters);
 
             // Split the parameters

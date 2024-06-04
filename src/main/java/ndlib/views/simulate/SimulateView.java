@@ -150,10 +150,10 @@ public class SimulateView extends VerticalLayout {
 
         switch (model) {
             case "SI":
-                addFieldsToForm("Alfa", "Beta");
+                addFieldsToForm("Transmission Rate", "Percentage Infected");
                 break;
             case "SIR":
-                addFieldsToForm("Alfa", "Beta", "Gamma");
+                addFieldsToForm("Transmission Rate", "Recovery Rate", "Percentage Infected");
                 break;
             case "SIS":
             case "SEIS":
